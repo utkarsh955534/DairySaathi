@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  FARMER
+  ADMIN
+  VETERINARIAN
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  fullName String
+
+  email String? @unique
+
+  phone String? @unique
+
+  passwordHash String
+
+  role UserRole @default(FARMER)
+
+  emailVerified Boolean @default(false)
+
+  phoneVerified Boolean @default(false)
+
+  isActive Boolean @default(false)
+
+  otpVerifications OtpVerification[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+  
+}
+
+
+
+enum OtpType {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+  PHONE_LOGIN
+}
+
+model OtpVerification {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  otpHash String
+
+  type OtpType
+
+  expiresAt DateTime
+
+  attempts Int @default(0)
+
+  verifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
