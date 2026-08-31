@@ -7,9 +7,24 @@ const authRoutes =
 
 const app = express();
 
+
+// ===============================
+// SECURITY
+// ===============================
+
 app.use(helmet());
 
+
+// ===============================
+// CORS
+// ===============================
+
 app.use(cors());
+
+
+// ===============================
+// BODY PARSER
+// ===============================
 
 app.use(express.json());
 
@@ -17,6 +32,10 @@ app.use(express.urlencoded({
     extended: true,
 }));
 
+
+// ===============================
+// HEALTH CHECK
+// ===============================
 
 app.get("/api/v1/health", (req, res) => {
 
@@ -28,10 +47,34 @@ app.get("/api/v1/health", (req, res) => {
 });
 
 
+// ===============================
+// AUTH ROUTES
+// ===============================
+
 app.use(
     "/api/v1/auth",
     authRoutes
 );
+
+
+// ===============================
+// GLOBAL ERROR HANDLER
+// ===============================
+
+app.use((err, req, res, next) => {
+
+    console.error("ERROR:", err);
+
+    return res.status(
+        err.statusCode || 400
+    ).json({
+        success: false,
+        message:
+            err.message ||
+            "Something went wrong",
+    });
+
+});
 
 
 module.exports = app;

@@ -85,8 +85,10 @@ const loginWithPhoneOtp =
         try {
 
             const result =
-                await authService
-                    .loginWithPhoneOtp(req.body);
+                await authService.loginWithPhoneOtp({
+                    phone:req.body.phone,
+                    otp:req.body.otp,
+                });
 
             res.status(200).json({
                 success: true,

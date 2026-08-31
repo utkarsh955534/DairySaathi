@@ -19,6 +19,7 @@ const {
     verifyOtpSchema,
     emailLoginSchema,
     phoneLoginSchema,
+    phoneLoginOtpSchema,
 } = require("./auth.validator");
 
 
@@ -61,7 +62,7 @@ router.post(
 
 router.post(
     "/login/phone/verify-otp",
-    validate(verifyOtpSchema),
+    validate(phoneLoginOtpSchema),
     loginWithPhoneOtp
 );
 

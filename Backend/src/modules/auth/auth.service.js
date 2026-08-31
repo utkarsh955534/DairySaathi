@@ -21,29 +21,55 @@ const register = async ({
         );
     }
 
-    // Check existing user
-    const existingUser = await prisma.user.findFirst({
-        where: {
-            OR: [
-                email ? { email } : undefined,
-                phone ? { phone } : undefined,
-            ].filter(Boolean),
-        },
-    });
+     
+    // CHECK EXISTING EMAIL
+     
 
-    if (existingUser) {
-        throw new Error(
-            "Email or phone number already registered"
-        );
+    if (email) {
+        const existingEmail =
+            await prisma.user.findUnique({
+                where: {
+                    email,
+                },
+            });
+
+        if (existingEmail) {
+            throw new Error(
+                "Email already registered. Please try to log in."
+            );
+        }
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(
-        password,
-        12
-    );
+     
+    // CHECK EXISTING PHONE
+     
 
-    // Create user
+    if (phone) {
+        const existingPhone =
+            await prisma.user.findUnique({
+                where: {
+                    phone,
+                },
+            });
+
+        if (existingPhone) {
+            throw new Error(
+                "Phone number already registered. Please try to log in."
+            );
+        }
+    }
+
+    
+    // HASH PASSWORD
+    
+
+    const passwordHash =
+        await bcrypt.hash(password, 12);
+
+     
+    // CREATE USER
+     
+
     const user = await prisma.user.create({
         data: {
             fullName,
@@ -53,7 +79,10 @@ const register = async ({
         },
     });
 
-    // Generate OTP
+     
+    // GENERATE OTP
+     
+
     const otp = generateOtp();
 
     const otpHash = hashOtp(otp);
@@ -315,13 +344,20 @@ const loginWithPhoneOtp = async ({
 
     const user = await prisma.user.findUnique({
         where: {
-            phone,
+            phone:phone,
         },
     });
 
     if (!user) {
         throw new Error("User not found");
     }
+    if (!user.phoneVerified) {
+    throw new Error("Phone number is not verified");
+  }
+
+  if (!user.isActive) {
+    throw new Error("Account is inactive");
+  }
 
     const otpRecord =
         await prisma.otpVerification.findFirst({
