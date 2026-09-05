@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell } from 'lucide-react';
+import { Bell, LogOut, Settings, Settings2, Settings2Icon, UserRoundArrowLeft } from 'lucide-react';
 
 export default function Navbar({ user }) {
     const router = useRouter();
@@ -17,7 +17,7 @@ export default function Navbar({ user }) {
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
 
-        router.replace("/login");
+        router.replace("/");
     };
 
     const navigation = [
@@ -183,9 +183,9 @@ export default function Navbar({ user }) {
                                             "/dashboard/profile"
                                         );
                                     }}
-                                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50"
+                                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 flex gap-2"
                                 >
-                                    👤 My Profile
+                                    <UserRoundArrowLeft/> My Profile
                                 </button>
 
 
@@ -200,9 +200,9 @@ export default function Navbar({ user }) {
                                             "/dashboard/settings"
                                         );
                                     }}
-                                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50"
+                                    className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 flex gap-2"
                                 >
-                                    ⚙️ Settings
+                                    <Settings/> Settings
                                 </button>
 
 
@@ -211,9 +211,9 @@ export default function Navbar({ user }) {
                                 <button
                                     type="button"
                                     onClick={handleLogout}
-                                    className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                                    className="w-full px-4 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex gap-2"
                                 >
-                                    ↪ Logout
+                                 <LogOut/> Logout
                                 </button>
 
                             </div>
@@ -322,9 +322,9 @@ export default function Navbar({ user }) {
                                     "/dashboard/profile"
                                 );
                             }}
-                            className="mt-2 w-full rounded-lg px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50"
+                            className="mt-2 w-full rounded-lg px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 flex gap-2"
                         >
-                            👤 My Profile
+                        <UserRoundArrowLeft/> My Profile
                         </button>
 
 
@@ -341,9 +341,9 @@ export default function Navbar({ user }) {
                                     "/dashboard/settings"
                                 );
                             }}
-                            className="w-full rounded-lg px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50"
+                            className="w-full rounded-lg px-3 py-3 text-left text-sm text-gray-700 hover:bg-green-50 flex gap-2"
                         >
-                            ⚙️ Settings
+                            <Settings/> Settings
                         </button>
 
 
@@ -352,9 +352,9 @@ export default function Navbar({ user }) {
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="mt-1 w-full rounded-lg px-3 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50"
+                            className="mt-1 w-full rounded-lg px-3 py-3 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex gap-2"
                         >
-                            ↪ Logout
+                        <LogOut/> Logout
                         </button>
 
                     </div>

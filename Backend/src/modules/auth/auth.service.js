@@ -7,6 +7,7 @@ const {
     generateOtp,
     hashOtp,
 } = require("../../utils/otp");
+const { getMe } = require("./auth.controller");
 
 const register = async ({
     fullName,
@@ -421,8 +422,155 @@ const loginWithPhoneOtp = async ({
     };
 };
 
+const updateProfile = async (
+    userId,
+    {
+        fullName,
+        email,
+        phone,
+    }
+) => {
+    if (!fullName || !fullName.trim()) {
+        throw new Error(
+            "Full name is required"
+        );
+    }
+
+    // Check duplicate email
+    if (email) {
+        const existingEmail =
+            await prisma.user.findFirst({
+                where: {
+                    email: email.trim(),
+                    NOT: {
+                        id: userId,
+                    },
+                },
+            });
+
+        if (existingEmail) {
+            throw new Error(
+                "Email already registered"
+            );
+        }
+    }
+
+    // Check duplicate phone
+    if (phone) {
+        const existingPhone =
+            await prisma.user.findFirst({
+                where: {
+                    phone: phone.trim(),
+                    NOT: {
+                        id: userId,
+                    },
+                },
+            });
+
+        if (existingPhone) {
+            throw new Error(
+                "Phone number already registered"
+            );
+        }
+    }
+
+    const user =
+        await prisma.user.update({
+            where: {
+                id: userId,
+            },
+
+            data: {
+                fullName:
+                    fullName.trim(),
+
+                email:
+                    email?.trim() || null,
+
+                phone:
+                    phone?.trim() || null,
+            },
+        });
+
+    return {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        emailVerified:
+            user.emailVerified,
+        phoneVerified:
+            user.phoneVerified,
+        isActive:
+            user.isActive,
+        createdAt:
+            user.createdAt,
+        updatedAt:
+            user.updatedAt,
+    };
+};
 
 
+
+const changePassword = async (
+    userId,
+    currentPassword,
+    newPassword
+) => {
+    const user =
+        await prisma.user.findUnique({
+            where: {
+                id: userId,
+            },
+        });
+
+    if (!user) {
+        throw new Error(
+            "User not found"
+        );
+    }
+
+    const passwordMatch =
+        await bcrypt.compare(
+            currentPassword,
+            user.passwordHash
+        );
+
+    if (!passwordMatch) {
+        throw new Error(
+            "Current password is incorrect"
+        );
+    }
+
+    if (newPassword.length < 8) {
+        throw new Error(
+            "New password must contain at least 8 characters"
+        );
+    }
+
+    const newPasswordHash =
+        await bcrypt.hash(
+            newPassword,
+            12
+        );
+
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+
+        data: {
+            passwordHash:
+                newPasswordHash,
+        },
+    });
+
+    return {
+        message:
+            "Password changed successfully",
+    };
+};
 
 module.exports = {
     register,
@@ -430,4 +578,7 @@ module.exports = {
     loginWithEmail,
     requestPhoneLoginOtp,
     loginWithPhoneOtp,
+    getMe,
+    updateProfile,
+    changePassword,
 };

@@ -9,6 +9,8 @@ const {
     requestPhoneLoginOtp,
     loginWithPhoneOtp,
     getMe,
+    updateProfile,
+    changePassword,
 } = require("./auth.controller");
 
 const validate =
@@ -66,5 +68,18 @@ router.post(
     loginWithPhoneOtp
 );
 
+
+router.put(
+    "/profile",
+    authMiddleware,
+    updateProfile,
+    
+);
+
+router.put(
+    "/change-password",
+    authMiddleware,
+    changePassword
+);
 
 module.exports = router;

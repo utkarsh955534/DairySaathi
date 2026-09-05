@@ -1,26 +1,29 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Navbar from "./components/Navbar";
+
+import Sidebar from "./components/Sidebar";
+import DashboardHeader from "./components/DashboardHeader";
+import StatsCards from "./components/StatsCard";
+import QuickActions from "./components/QuickActions";
+import RecentActivity from "./components/RecentActivity";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:8000/api/v1";
 
 export default function Dashboard() {
-
     const router = useRouter();
 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [sidebarOpen, setSidebarOpen] =
+        useState(false);
 
     useEffect(() => {
-
         const checkAuth = async () => {
-
             const token =
                 localStorage.getItem(
                     "authToken"
@@ -32,7 +35,6 @@ export default function Dashboard() {
             }
 
             try {
-
                 const response =
                     await fetch(
                         `${API_BASE_URL}/auth/me`,
@@ -40,6 +42,8 @@ export default function Dashboard() {
                             headers: {
                                 Authorization:
                                     `Bearer ${token}`,
+                                Accept:
+                                    "application/json",
                             },
                         }
                     );
@@ -48,7 +52,6 @@ export default function Dashboard() {
                     await response.json();
 
                 if (!response.ok) {
-
                     localStorage.removeItem(
                         "authToken"
                     );
@@ -63,14 +66,29 @@ export default function Dashboard() {
                 }
 
                 setUser(data.data);
+
+                // Keep latest user data
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify(
+                        data.data
+                    )
+                );
+
                 setLoading(false);
 
             } catch (error) {
-
-                console.error(error);
+                console.error(
+                    "Authentication error:",
+                    error
+                );
 
                 localStorage.removeItem(
                     "authToken"
+                );
+
+                localStorage.removeItem(
+                    "user"
                 );
 
                 router.replace("/login");
@@ -78,16 +96,29 @@ export default function Dashboard() {
         };
 
         checkAuth();
-
     }, [router]);
 
 
+    // =========================
+    // LOADING
+    // =========================
+
     if (loading) {
         return (
-            <div className="flex min-h-screen items-center justify-center">
-                <p className="text-green-700">
-                    Loading DairySaathi...
-                </p>
+            <div className="flex min-h-screen items-center justify-center bg-gray-50">
+
+                <div className="text-center">
+
+                    <div className="mb-3 text-4xl">
+                        🐄
+                    </div>
+
+                    <p className="font-medium text-green-700">
+                        Loading DairySaathi...
+                    </p>
+
+                </div>
+
             </div>
         );
     }
@@ -96,19 +127,93 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-50">
 
-            <Navbar user={user} />
 
-            <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-                <h1 className="text-3xl font-bold text-gray-800">
-                    Welcome, {user?.fullName}
-                </h1>
+            <div className="flex">
 
-                <p className="mt-2 text-gray-600">
-                    Manage your dairy farm from one place.
-                </p>
+                {/* =========================
+                    SIDEBAR
+                ========================= */}
 
-            </main>
+                <Sidebar
+                    open={sidebarOpen}
+                    onClose={() =>
+                        setSidebarOpen(
+                            false
+                        )
+                    }
+                />
+
+
+                {/* =========================
+                    MAIN CONTENT
+                ========================= */}
+
+                <main className="min-w-0 flex-1">
+
+                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+                        {/* HEADER */}
+
+                        <DashboardHeader
+                            onMenuClick={() =>
+                                setSidebarOpen(
+                                    true
+                                )
+                            }
+                        />
+
+
+                        {/* =========================
+                            WELCOME CARD
+                        ========================= */}
+
+                        <section className="mb-8 overflow-hidden rounded-2xl bg-green-700 p-6 text-white shadow-sm sm:p-8">
+
+                            <p className="text-sm font-medium text-green-100">
+                                Welcome back,
+                            </p>
+
+                            <h2 className="mt-1 text-2xl font-bold sm:text-3xl">
+                                {user?.fullName} 👋
+                            </h2>
+
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-green-50 sm:text-base">
+                                Manage your livestock,
+                                milk production,
+                                animal health and
+                                veterinary activities
+                                from one place.
+                            </p>
+
+                        </section>
+
+
+                        {/* =========================
+                            STATS
+                        ========================= */}
+
+                        <StatsCards />
+
+
+                        {/* =========================
+                            QUICK ACTIONS
+                        ========================= */}
+
+                        <QuickActions />
+
+
+                        {/* =========================
+                            RECENT ACTIVITY
+                        ========================= */}
+
+                        <RecentActivity />
+
+                    </div>
+
+                </main>
+
+            </div>
 
         </div>
     );

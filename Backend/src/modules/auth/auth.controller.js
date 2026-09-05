@@ -102,17 +102,86 @@ const loginWithPhoneOtp =
     };
 
     const getMe = async (req, res, next) => {
-  try {
-    res.status(200).json({
-      success: true,
-      message: "Authenticated user",
-      user: req.user,
-    });
-  } catch (error) {
-    next(error);
-  }
+    try {
+        const user = req.user;
+
+        return res.status(200).json({
+            success: true,
+            message: "Authenticated user",
+
+            data: {
+                id: user.id,
+                fullName: user.fullName,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                emailVerified: user.emailVerified,
+                phoneVerified: user.phoneVerified,
+                isActive: user.isActive,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
 };
 
+
+const updateProfile = async (
+    req,
+    res,
+    next
+) => {
+    try {
+
+        const user =
+            await authService.updateProfile(
+                req.user.id,
+                req.body
+            );
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "Profile updated successfully",
+            data: user,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+const changePassword = async (
+    req,
+    res,
+    next
+) => {
+    try {
+        const {
+            currentPassword,
+            newPassword,
+        } = req.body;
+
+        const result =
+            await authService.changePassword(
+                req.user.id,
+                currentPassword,
+                newPassword
+            );
+
+        return res.status(200).json({
+            success: true,
+            message:
+                result.message,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 
 module.exports = {
     register,
@@ -121,4 +190,6 @@ module.exports = {
     requestPhoneLoginOtp,
     loginWithPhoneOtp,
     getMe,
+    updateProfile,
+    changePassword
 };
