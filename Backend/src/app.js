@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 
-const authRoutes =
-    require("./modules/auth/auth.routes");
+const authRoutes = require("./modules/auth/auth.routes");
+
+const animalRoutes = require("./modules/animals/animal.routes");
 
 const app = express();
 
@@ -45,6 +46,11 @@ app.get("/api/v1/health", (req, res) => {
     });
 
 });
+
+
+// Animals route
+
+ app.use("/api/v1/animals", animalRoutes);
 
 
 // ===============================

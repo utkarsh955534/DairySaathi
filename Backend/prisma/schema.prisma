@@ -1,7 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
   provider = "prisma-client-js"
@@ -40,6 +37,8 @@ model User {
 
   isActive Boolean @default(false)
 
+  animals Animal[]
+
   otpVerifications OtpVerification[]
 
   createdAt DateTime @default(now())
@@ -77,4 +76,138 @@ model OtpVerification {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+
+
+// Animal Model
+
+enum AnimalSpecies {
+  COW
+  BUFFALO
+}
+
+enum AnimalSex {
+  FEMALE
+  MALE
+}
+
+enum AnimalLifeStage {
+  CALF
+  HEIFER
+  ADULT
+}
+
+enum ProductionStatus {
+  LACTATING
+  DRY
+  NOT_APPLICABLE
+}
+
+enum PregnancyStatus {
+  NOT_APPLICABLE
+  NOT_PREGNANT
+  PREGNANT
+}
+
+enum ParentSource {
+  EXISTING
+  EXTERNAL
+  UNKNOWN
+}
+
+model Animal {
+  id       Int @id @default(autoincrement())
+  userId   Int
+
+  // =========================
+  // BASIC INFORMATION
+  // =========================
+
+  name      String
+  tagNumber String
+
+  species   AnimalSpecies
+  sex       AnimalSex
+  lifeStage AnimalLifeStage
+
+  breed       String?
+  dateOfBirth DateTime?
+  weight      Float?
+  photoUrl    String?
+
+  // =========================
+  // MOTHER
+  // =========================
+
+  motherSource ParentSource @default(UNKNOWN)
+
+  motherId Int?
+
+  motherExternalName  String?
+  motherExternalBreed String?
+  motherExternalTag   String?
+
+  // =========================
+  // FATHER
+  // =========================
+
+  fatherSource ParentSource @default(UNKNOWN)
+
+  fatherId Int?
+
+  fatherExternalName  String?
+  fatherExternalBreed String?
+  fatherExternalTag   String?
+
+  // =========================
+  // PRODUCTION
+  // =========================
+
+  productionStatus ProductionStatus @default(NOT_APPLICABLE)
+
+  lactationNumber       Int?
+  lactationStartDate    DateTime?
+  currentMilkProduction Float?
+
+  // =========================
+  // REPRODUCTION
+  // =========================
+
+  pregnancyStatus     PregnancyStatus @default(NOT_APPLICABLE)
+  lastCalvingDate     DateTime?
+  expectedCalvingDate DateTime?
+
+  // =========================
+  // OTHER
+  // =========================
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // =========================
+  // RELATIONS
+  // =========================
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mother Animal? @relation("MotherChildren", fields: [motherId], references: [id], onDelete: SetNull)
+  childrenByMother Animal[] @relation("MotherChildren")
+
+  father Animal? @relation("FatherChildren", fields: [fatherId], references: [id], onDelete: SetNull)
+  childrenByFather Animal[] @relation("FatherChildren")
+
+  // =========================
+  // INDEXES
+  // =========================
+
+  @@unique([userId, tagNumber])
+  @@index([userId])
+  @@index([species])
+  @@index([sex])
+  @@index([lifeStage])
+  @@index([motherId])
+  @@index([fatherId])
 }

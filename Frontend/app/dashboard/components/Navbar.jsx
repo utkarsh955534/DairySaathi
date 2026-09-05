@@ -27,7 +27,7 @@ export default function Navbar({ user }) {
         },
         {
             name: "Animals",
-            path: "/dashboard/animals",
+            path: "/dashboard/livestock",
         },
         {
             name: "Health",
