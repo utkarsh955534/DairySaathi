@@ -3,227 +3,91 @@ const jwt = require("jsonwebtoken");
 
 const prisma = require("../../config/db");
 
-const {
-    generateOtp,
-    hashOtp,
-} = require("../../utils/otp");
-const { getMe } = require("./auth.controller");
+
+// =========================
+// REGISTER
+// =========================
 
 const register = async ({
     fullName,
     email,
-    phone,
     password,
 }) => {
 
-    if (!email && !phone) {
+    if (!fullName || !fullName.trim()) {
+        throw new Error("Full name is required");
+    }
+
+    if (!email || !email.trim()) {
+        throw new Error("Email is required");
+    }
+
+    if (!password) {
+        throw new Error("Password is required");
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check existing email
+    const existingUser = await prisma.user.findUnique({
+        where: {
+            email: normalizedEmail,
+        },
+    });
+
+    if (existingUser) {
         throw new Error(
-            "Email or phone number is required"
+            "Email already registered. Please try to log in."
         );
     }
 
-     
-    // CHECK EXISTING EMAIL
-     
-
-    if (email) {
-        const existingEmail =
-            await prisma.user.findUnique({
-                where: {
-                    email,
-                },
-            });
-
-        if (existingEmail) {
-            throw new Error(
-                "Email already registered. Please try to log in."
-            );
-        }
-    }
-
-     
-    // CHECK EXISTING PHONE
-     
-
-    if (phone) {
-        const existingPhone =
-            await prisma.user.findUnique({
-                where: {
-                    phone,
-                },
-            });
-
-        if (existingPhone) {
-            throw new Error(
-                "Phone number already registered. Please try to log in."
-            );
-        }
-    }
-
-    
-    // HASH PASSWORD
-    
-
-    const passwordHash =
-        await bcrypt.hash(password, 12);
-
-     
-    // CREATE USER
-     
-
-    const user = await prisma.user.create({
-        data: {
-            fullName,
-            email,
-            phone,
-            passwordHash,
-        },
-    });
-
-     
-    // GENERATE OTP
-     
-
-    const otp = generateOtp();
-
-    const otpHash = hashOtp(otp);
-
-    const otpType = email
-        ? "EMAIL_VERIFICATION"
-        : "PHONE_VERIFICATION";
-
-    await prisma.otpVerification.create({
-        data: {
-            userId: user.id,
-            otpHash,
-            type: otpType,
-            expiresAt: new Date(
-                Date.now() + 5 * 60 * 1000
-            ),
-        },
-    });
-
-    // DEVELOPMENT ONLY
-    console.log(
-        `[DEV OTP] ${otpType}: ${otp}`
+    // Hash password
+    const passwordHash = await bcrypt.hash(
+        password,
+        12
     );
 
-    return {
-        userId: user.id,
-        verificationRequired: true,
-        verificationType: email
-            ? "EMAIL"
-            : "PHONE",
-    };
-};
-
-
-
-
-const verifyOtp = async ({
-    identifier,
-    otp,
-}) => {
-
-    const user = await prisma.user.findFirst({
-        where: {
-            OR: [
-                { email: identifier },
-                { phone: identifier },
-            ],
-        },
-    });
-
-    if (!user) {
-        throw new Error("User not found");
-    }
-
-    const otpRecord =
-        await prisma.otpVerification.findFirst({
-            where: {
-                userId: user.id,
-                verifiedAt: null,
-                expiresAt: {
-                    gt: new Date(),
-                },
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
-
-    if (!otpRecord) {
-        throw new Error(
-            "OTP expired or not found"
-        );
-    }
-
-    if (otpRecord.attempts >= 5) {
-        throw new Error(
-            "Maximum OTP attempts exceeded"
-        );
-    }
-
-    const otpHash = hashOtp(otp);
-
-    if (otpHash !== otpRecord.otpHash) {
-
-        await prisma.otpVerification.update({
-            where: {
-                id: otpRecord.id,
-            },
-            data: {
-                attempts: {
-                    increment: 1,
-                },
-            },
-        });
-
-        throw new Error("Invalid OTP");
-    }
-
-    await prisma.otpVerification.update({
-        where: {
-            id: otpRecord.id,
-        },
+    // Create user
+    const user = await prisma.user.create({
         data: {
-            verifiedAt: new Date(),
+            fullName: fullName.trim(),
+            email: normalizedEmail,
+            passwordHash,
+
+            // No OTP verification now
+            emailVerified: true,
+            isActive: true,
         },
-    });
-
-    const updateData = {};
-
-    if (user.email === identifier) {
-        updateData.emailVerified = true;
-    }
-
-    if (user.phone === identifier) {
-        updateData.phoneVerified = true;
-    }
-
-    updateData.isActive = true;
-
-    await prisma.user.update({
-        where: {
-            id: user.id,
-        },
-        data: updateData,
     });
 
     return {
-        message: "Account verified successfully",
+        user: sanitizeUser(user),
     };
 };
 
+
+// =========================
+// LOGIN WITH EMAIL
+// =========================
 
 const loginWithEmail = async ({
     email,
     password,
 }) => {
 
+    if (!email || !email.trim()) {
+        throw new Error("Email is required");
+    }
+
+    if (!password) {
+        throw new Error("Password is required");
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
     const user = await prisma.user.findUnique({
         where: {
-            email,
+            email: normalizedEmail,
         },
     });
 
@@ -233,9 +97,9 @@ const loginWithEmail = async ({
         );
     }
 
-    if (!user.emailVerified) {
+    if (!user.isActive) {
         throw new Error(
-            "Please verify your email first"
+            "Account is inactive"
         );
     }
 
@@ -260,10 +124,37 @@ const loginWithEmail = async ({
 };
 
 
+// =========================
+// GET CURRENT USER
+// =========================
+
+const getMe = async (userId) => {
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: Number(userId),
+        },
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    return sanitizeUser(user);
+};
 
 
+// =========================
+// GENERATE JWT
+// =========================
 
 const generateToken = (user) => {
+
+    if (!process.env.JWT_SECRET) {
+        throw new Error(
+            "JWT_SECRET is not configured"
+        );
+    }
 
     return jwt.sign(
         {
@@ -279,6 +170,10 @@ const generateToken = (user) => {
 };
 
 
+// =========================
+// SANITIZE USER
+// =========================
+
 const sanitizeUser = (user) => {
 
     return {
@@ -289,138 +184,16 @@ const sanitizeUser = (user) => {
         role: user.role,
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
     };
 };
 
 
-
-
-const requestPhoneLoginOtp = async (phone) => {
-
-    const user = await prisma.user.findUnique({
-        where: {
-            phone,
-        },
-    });
-
-    if (!user) {
-        throw new Error("User not found");
-    }
-
-    if (!user.phoneVerified) {
-        throw new Error(
-            "Phone number is not verified"
-        );
-    }
-
-    const otp = generateOtp();
-
-    const otpHash = hashOtp(otp);
-
-    await prisma.otpVerification.create({
-        data: {
-            userId: user.id,
-            otpHash,
-            type: "PHONE_LOGIN",
-            expiresAt: new Date(
-                Date.now() + 5 * 60 * 1000
-            ),
-        },
-    });
-
-    // DEVELOPMENT ONLY
-    console.log(`[DEV LOGIN OTP]: ${otp}`);
-
-    return {
-        message: "Login OTP sent successfully",
-    };
-};
-
-
-
-const loginWithPhoneOtp = async ({
-    phone,
-    otp,
-}) => {
-
-    const user = await prisma.user.findUnique({
-        where: {
-            phone:phone,
-        },
-    });
-
-    if (!user) {
-        throw new Error("User not found");
-    }
-    if (!user.phoneVerified) {
-    throw new Error("Phone number is not verified");
-  }
-
-  if (!user.isActive) {
-    throw new Error("Account is inactive");
-  }
-
-    const otpRecord =
-        await prisma.otpVerification.findFirst({
-            where: {
-                userId: user.id,
-                type: "PHONE_LOGIN",
-                verifiedAt: null,
-                expiresAt: {
-                    gt: new Date(),
-                },
-            },
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
-
-    if (!otpRecord) {
-        throw new Error(
-            "OTP expired or not found"
-        );
-    }
-
-    if (otpRecord.attempts >= 5) {
-        throw new Error(
-            "Maximum OTP attempts exceeded"
-        );
-    }
-
-    if (
-        hashOtp(otp) !== otpRecord.otpHash
-    ) {
-
-        await prisma.otpVerification.update({
-            where: {
-                id: otpRecord.id,
-            },
-            data: {
-                attempts: {
-                    increment: 1,
-                },
-            },
-        });
-
-        throw new Error("Invalid OTP");
-    }
-
-    await prisma.otpVerification.update({
-        where: {
-            id: otpRecord.id,
-        },
-        data: {
-            verifiedAt: new Date(),
-        },
-    });
-
-    const token = generateToken(user);
-
-    return {
-        token,
-        user: sanitizeUser(user),
-    };
-};
+// =========================
+// UPDATE PROFILE
+// =========================
 
 const updateProfile = async (
     userId,
@@ -430,20 +203,29 @@ const updateProfile = async (
         phone,
     }
 ) => {
+
     if (!fullName || !fullName.trim()) {
         throw new Error(
             "Full name is required"
         );
     }
 
+    const normalizedEmail =
+        email?.trim().toLowerCase() || null;
+
+    const normalizedPhone =
+        phone?.trim() || null;
+
+
     // Check duplicate email
-    if (email) {
+    if (normalizedEmail) {
+
         const existingEmail =
             await prisma.user.findFirst({
                 where: {
-                    email: email.trim(),
+                    email: normalizedEmail,
                     NOT: {
-                        id: userId,
+                        id: Number(userId),
                     },
                 },
             });
@@ -455,14 +237,16 @@ const updateProfile = async (
         }
     }
 
+
     // Check duplicate phone
-    if (phone) {
+    if (normalizedPhone) {
+
         const existingPhone =
             await prisma.user.findFirst({
                 where: {
-                    phone: phone.trim(),
+                    phone: normalizedPhone,
                     NOT: {
-                        id: userId,
+                        id: Number(userId),
                     },
                 },
             });
@@ -474,54 +258,57 @@ const updateProfile = async (
         }
     }
 
+
     const user =
         await prisma.user.update({
             where: {
-                id: userId,
+                id: Number(userId),
             },
 
             data: {
-                fullName:
-                    fullName.trim(),
-
-                email:
-                    email?.trim() || null,
-
-                phone:
-                    phone?.trim() || null,
+                fullName: fullName.trim(),
+                email: normalizedEmail,
+                phone: normalizedPhone,
             },
         });
 
-    return {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        emailVerified:
-            user.emailVerified,
-        phoneVerified:
-            user.phoneVerified,
-        isActive:
-            user.isActive,
-        createdAt:
-            user.createdAt,
-        updatedAt:
-            user.updatedAt,
-    };
+    return sanitizeUser(user);
 };
 
 
+// =========================
+// CHANGE PASSWORD
+// =========================
 
 const changePassword = async (
     userId,
     currentPassword,
     newPassword
 ) => {
+
+    if (!currentPassword) {
+        throw new Error(
+            "Current password is required"
+        );
+    }
+
+    if (!newPassword) {
+        throw new Error(
+            "New password is required"
+        );
+    }
+
+    if (newPassword.length < 8) {
+        throw new Error(
+            "New password must contain at least 8 characters"
+        );
+    }
+
+
     const user =
         await prisma.user.findUnique({
             where: {
-                id: userId,
+                id: Number(userId),
             },
         });
 
@@ -530,6 +317,7 @@ const changePassword = async (
             "User not found"
         );
     }
+
 
     const passwordMatch =
         await bcrypt.compare(
@@ -543,11 +331,6 @@ const changePassword = async (
         );
     }
 
-    if (newPassword.length < 8) {
-        throw new Error(
-            "New password must contain at least 8 characters"
-        );
-    }
 
     const newPasswordHash =
         await bcrypt.hash(
@@ -555,16 +338,17 @@ const changePassword = async (
             12
         );
 
+
     await prisma.user.update({
         where: {
-            id: userId,
+            id: Number(userId),
         },
 
         data: {
-            passwordHash:
-                newPasswordHash,
+            passwordHash: newPasswordHash,
         },
     });
+
 
     return {
         message:
@@ -572,12 +356,14 @@ const changePassword = async (
     };
 };
 
+
+// =========================
+// EXPORTS
+// =========================
+
 module.exports = {
     register,
-    verifyOtp,
     loginWithEmail,
-    requestPhoneLoginOtp,
-    loginWithPhoneOtp,
     getMe,
     updateProfile,
     changePassword,

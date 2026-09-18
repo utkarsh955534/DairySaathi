@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const authRoutes = require("./modules/auth/auth.routes");
 
 const animalRoutes = require("./modules/animals/animal.routes");
+const historyRoutes = require("./modules/history/history.routes");
 
 const app = express();
 
@@ -62,6 +63,8 @@ app.use(
     authRoutes
 );
 
+
+app.use("/api/v1/history", historyRoutes);
 
 // ===============================
 // GLOBAL ERROR HANDLER

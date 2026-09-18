@@ -1,0 +1,66 @@
+model Animal {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  name String
+  tagNumber String
+
+  species AnimalSpecies
+  sex AnimalSex
+  lifeStage AnimalLifeStage
+
+  breed String?
+  dateOfBirth DateTime?
+  weight Float?
+  photoUrl String?
+
+  motherSource ParentSource @default(UNKNOWN)
+  motherId Int?
+
+  motherExternalName String?
+  motherExternalBreed String?
+  motherExternalTag String?
+
+  fatherSource ParentSource @default(UNKNOWN)
+  fatherId Int?
+
+  fatherExternalName String?
+  fatherExternalBreed String?
+  fatherExternalTag String?
+
+  productionStatus ProductionStatus @default(NOT_APPLICABLE)
+
+  lactationNumber Int?
+  lactationStartDate DateTime?
+  currentMilkProduction Float?
+
+  pregnancyStatus PregnancyStatus @default(NOT_APPLICABLE)
+
+  lastCalvingDate DateTime?
+  expectedCalvingDate DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mother Animal? @relation("MotherChildren", fields: [motherId], references: [id], onDelete: SetNull)
+
+  childrenByMother Animal[] @relation("MotherChildren")
+
+  father Animal? @relation("FatherChildren", fields: [fatherId], references: [id], onDelete: SetNull)
+
+  childrenByFather Animal[] @relation("FatherChildren")
+
+  @@unique([userId, tagNumber])
+
+  @@index([userId])
+  @@index([species])
+  @@index([sex])
+  @@index([lifeStage])
+  @@index([motherId])
+  @@index([fatherId])
+}

@@ -4,35 +4,36 @@ const router = express.Router();
 
 const {
     register,
-    verifyOtp,
     loginWithEmail,
-    requestPhoneLoginOtp,
-    loginWithPhoneOtp,
     getMe,
     updateProfile,
     changePassword,
 } = require("./auth.controller");
 
-const validate =
-    require("../../middlewares/validate.middleware");
+const validate = require("../../middlewares/validate.middleware");
 
 const {
     registerSchema,
-    verifyOtpSchema,
     emailLoginSchema,
-    phoneLoginSchema,
-    phoneLoginOtpSchema,
 } = require("./auth.validator");
 
-
 const authMiddleware = require("../../middlewares/auth.middleware");
+
+
+// =========================
+// GET CURRENT USER
+// =========================
+
 router.get(
-  "/me",
-  authMiddleware,
-  getMe
+    "/me",
+    authMiddleware,
+    getMe
 );
 
 
+// =========================
+// REGISTER
+// =========================
 
 router.post(
     "/register",
@@ -41,12 +42,9 @@ router.post(
 );
 
 
-router.post(
-    "/verify-otp",
-    validate(verifyOtpSchema),
-    verifyOtp
-);
-
+// =========================
+// EMAIL LOGIN
+// =========================
 
 router.post(
     "/login/email",
@@ -55,31 +53,26 @@ router.post(
 );
 
 
-router.post(
-    "/login/phone/request-otp",
-    validate(phoneLoginSchema),
-    requestPhoneLoginOtp
-);
-
-
-router.post(
-    "/login/phone/verify-otp",
-    validate(phoneLoginOtpSchema),
-    loginWithPhoneOtp
-);
-
+// =========================
+// UPDATE PROFILE
+// =========================
 
 router.put(
     "/profile",
     authMiddleware,
-    updateProfile,
-    
+    updateProfile
 );
+
+
+// =========================
+// CHANGE PASSWORD
+// =========================
 
 router.put(
     "/change-password",
     authMiddleware,
     changePassword
 );
+
 
 module.exports = router;

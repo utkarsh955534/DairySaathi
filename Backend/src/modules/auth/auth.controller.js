@@ -1,16 +1,17 @@
 const authService = require("./auth.service");
 
+
+// =========================
+// REGISTER
+// =========================
+
 const register = async (req, res, next) => {
-
     try {
+        const result = await authService.register(req.body);
 
-        const result =
-            await authService.register(req.body);
-
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
-            message:
-                "Registration successful. Please verify OTP.",
+            message: "Registration successful",
             data: result,
         });
 
@@ -20,32 +21,15 @@ const register = async (req, res, next) => {
 };
 
 
-const verifyOtp = async (req, res, next) => {
-
-    try {
-
-        const result =
-            await authService.verifyOtp(req.body);
-
-        res.status(200).json({
-            success: true,
-            ...result,
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
-
+// =========================
+// LOGIN WITH EMAIL
+// =========================
 
 const loginWithEmail = async (req, res, next) => {
-
     try {
+        const result = await authService.loginWithEmail(req.body);
 
-        const result =
-            await authService.loginWithEmail(req.body);
-
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Login successful",
             data: result,
@@ -57,95 +41,18 @@ const loginWithEmail = async (req, res, next) => {
 };
 
 
-const requestPhoneLoginOtp =
-    async (req, res, next) => {
+// =========================
+// GET CURRENT USER
+// =========================
 
-        try {
-
-            const result =
-                await authService
-                    .requestPhoneLoginOtp(
-                        req.body.phone
-                    );
-
-            res.status(200).json({
-                success: true,
-                ...result,
-            });
-
-        } catch (error) {
-            next(error);
-        }
-    };
-
-
-const loginWithPhoneOtp =
-    async (req, res, next) => {
-
-        try {
-
-            const result =
-                await authService.loginWithPhoneOtp({
-                    phone:req.body.phone,
-                    otp:req.body.otp,
-                });
-
-            res.status(200).json({
-                success: true,
-                message: "Login successful",
-                data: result,
-            });
-
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    const getMe = async (req, res, next) => {
+const getMe = async (req, res, next) => {
     try {
-        const user = req.user;
+        const user = await authService.getMe(
+            req.user.id
+        );
 
         return res.status(200).json({
             success: true,
-            message: "Authenticated user",
-
-            data: {
-                id: user.id,
-                fullName: user.fullName,
-                email: user.email,
-                phone: user.phone,
-                role: user.role,
-                emailVerified: user.emailVerified,
-                phoneVerified: user.phoneVerified,
-                isActive: user.isActive,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-            },
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-const updateProfile = async (
-    req,
-    res,
-    next
-) => {
-    try {
-
-        const user =
-            await authService.updateProfile(
-                req.user.id,
-                req.body
-            );
-
-        return res.status(200).json({
-            success: true,
-            message:
-                "Profile updated successfully",
             data: user,
         });
 
@@ -154,11 +61,35 @@ const updateProfile = async (
     }
 };
 
-const changePassword = async (
-    req,
-    res,
-    next
-) => {
+
+// =========================
+// UPDATE PROFILE
+// =========================
+
+const updateProfile = async (req, res, next) => {
+    try {
+        const user = await authService.updateProfile(
+            req.user.id,
+            req.body
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            data: user,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+// =========================
+// CHANGE PASSWORD
+// =========================
+
+const changePassword = async (req, res, next) => {
     try {
         const {
             currentPassword,
@@ -174,8 +105,7 @@ const changePassword = async (
 
         return res.status(200).json({
             success: true,
-            message:
-                result.message,
+            message: result.message,
         });
 
     } catch (error) {
@@ -183,13 +113,15 @@ const changePassword = async (
     }
 };
 
+
+// =========================
+// EXPORTS
+// =========================
+
 module.exports = {
     register,
-    verifyOtp,
     loginWithEmail,
-    requestPhoneLoginOtp,
-    loginWithPhoneOtp,
     getMe,
     updateProfile,
-    changePassword
+    changePassword,
 };
