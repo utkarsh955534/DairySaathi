@@ -55,6 +55,7 @@ model Animal {
 
   milkRecords MilkRecord[]
   weightRecords WeightRecord[]
+  healthRecords HealthRecord[]
 
   @@unique([userId, tagNumber])
 

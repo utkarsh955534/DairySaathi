@@ -1,0 +1,50 @@
+enum HealthType {
+  DEWORMING
+  VACCINATION
+  TREATMENT
+  CHECKUP
+  OTHER
+}
+
+model HealthRecord {
+  id Int @id @default(autoincrement())
+
+  animalId Int
+  type HealthType
+  recordDate DateTime
+
+  // Vaccination
+  vaccineName String?
+
+  // Deworming
+  dewormerName String?
+
+  // Treatment
+  problem String?
+  diagnosis String?
+  treatmentMedicine String?
+  treatmentDose String?
+  treatmentNextReview DateTime?
+
+  // Checkup
+  checkupType String?
+  findings String?
+
+  // Common
+  dose String?
+  nextDue DateTime?
+
+  // Other
+  title String?
+  details String?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId])
+  @@index([recordDate])
+  @@index([type])
+}

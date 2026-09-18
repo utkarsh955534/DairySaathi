@@ -6,7 +6,9 @@ const authRoutes = require("./modules/auth/auth.routes");
 
 const animalRoutes = require("./modules/animals/animal.routes");
 const historyRoutes = require("./modules/history/history.routes");
-const milkRoutes = require("./modules/milk/milk.routes");const weightRoutes = require("./modules/weight/weight.routes");
+const milkRoutes = require("./modules/milk/milk.routes");
+const weightRoutes = require("./modules/weight/weight.routes");
+const healthRoutes = require("./modules/health/health.routes");
 
 const app = express();
 
@@ -68,6 +70,7 @@ app.use(
 app.use("/api/v1/history", historyRoutes);
 app.use("/api/v1/milk", milkRoutes);
 app.use("/api/v1/weight", weightRoutes);
+app.use("/api/v1/health", healthRoutes);
 
 // ===============================
 // GLOBAL ERROR HANDLER
