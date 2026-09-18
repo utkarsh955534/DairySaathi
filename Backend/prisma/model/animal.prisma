@@ -1,69 +1,163 @@
+
+
 model Animal {
   id Int @id @default(autoincrement())
 
+  // =========================
+  // OWNER
+  // =========================
+
   userId Int
 
+  // =========================
+  // BASIC INFORMATION
+  // =========================
+
   name String
+
   tagNumber String
 
   species AnimalSpecies
-  sex AnimalSex
+
+  // Optional because a newly added calf
+  // initially gets only a farmer-assigned tag.
+  sex AnimalSex?
+
   lifeStage AnimalLifeStage
 
   breed String?
+
   dateOfBirth DateTime?
+
   weight Float?
+
   photoUrl String?
 
+  // =========================
+  // MOTHER
+  // =========================
+
   motherSource ParentSource @default(UNKNOWN)
+
   motherId Int?
 
   motherExternalName String?
+
   motherExternalBreed String?
+
   motherExternalTag String?
 
+  // =========================
+  // FATHER
+  // =========================
+
   fatherSource ParentSource @default(UNKNOWN)
+
   fatherId Int?
 
   fatherExternalName String?
+
   fatherExternalBreed String?
+
   fatherExternalTag String?
+
+  // =========================
+  // PRODUCTION
+  // =========================
 
   productionStatus ProductionStatus @default(NOT_APPLICABLE)
 
   lactationNumber Int?
+
   lactationStartDate DateTime?
+
   currentMilkProduction Float?
+
+  // =========================
+  // PREGNANCY
+  // =========================
 
   pregnancyStatus PregnancyStatus @default(NOT_APPLICABLE)
 
   lastCalvingDate DateTime?
+
   expectedCalvingDate DateTime?
+
+  // =========================
+  // OTHER
+  // =========================
 
   notes String?
 
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
+
+  // =========================
+  // USER RELATION
+  // =========================
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // =========================
+  // PARENT RELATIONS
+  // =========================
+
   mother Animal? @relation("MotherChildren", fields: [motherId], references: [id], onDelete: SetNull)
+
   childrenByMother Animal[] @relation("MotherChildren")
 
   father Animal? @relation("FatherChildren", fields: [fatherId], references: [id], onDelete: SetNull)
+
   childrenByFather Animal[] @relation("FatherChildren")
 
+  // =========================
+  // MILK
+  // =========================
+
   milkRecords MilkRecord[]
+
+  // =========================
+  // WEIGHT
+  // =========================
+
   weightRecords WeightRecord[]
+
+  // =========================
+  // HEALTH
+  // =========================
+
   healthRecords HealthRecord[]
+
+  // =========================
+  // BREEDING
+  // =========================
+
   breedingRecords BreedingRecord[]
+
+  // =========================
+  // CALVING
+  // =========================
+
+  calvingsAsMother CalvingRecord[] @relation("MotherCalvings")
+
+  calvingsAsCalf CalvingRecord[] @relation("CalvingCalf")
+
+  // =========================
+  // CONSTRAINTS
+  // =========================
 
   @@unique([userId, tagNumber])
 
   @@index([userId])
+
   @@index([species])
+
   @@index([sex])
+
   @@index([lifeStage])
+
   @@index([motherId])
+
   @@index([fatherId])
 }

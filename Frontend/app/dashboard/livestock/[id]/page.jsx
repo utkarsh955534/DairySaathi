@@ -11,6 +11,7 @@ import HistorySection from "./components/HistorySection";
 import WeightSection from "./components/WeightSection";
 import HealthSection from "./components/HealthSection";
 import BreedingSection from "./components/BreedingSection";
+import CalvingSection from "./components/CalvingSection";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -296,6 +297,14 @@ export default function AnimalProfilePage() {
                 {!editing && (
                     <BreedingSection
                         animalId={animal.id}
+                    />
+                )}
+
+                {/* Calving Section */}
+                {!editing && (
+                    <CalvingSection
+                        animal={animal}
+                        onChanged={fetchHistory}
                     />
                 )}
 
