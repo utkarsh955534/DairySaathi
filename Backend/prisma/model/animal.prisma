@@ -48,12 +48,12 @@ model Animal {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   mother Animal? @relation("MotherChildren", fields: [motherId], references: [id], onDelete: SetNull)
-
   childrenByMother Animal[] @relation("MotherChildren")
 
   father Animal? @relation("FatherChildren", fields: [fatherId], references: [id], onDelete: SetNull)
-
   childrenByFather Animal[] @relation("FatherChildren")
+
+  milkRecords MilkRecord[]
 
   @@unique([userId, tagNumber])
 

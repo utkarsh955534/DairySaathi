@@ -1,11 +1,19 @@
 const prisma = require("../../config/db");
 
 const getAnimalHistory = async (userId, animalId) => {
+    const numericUserId = Number(userId);
+    const numericAnimalId = Number(animalId);
+
+    // =========================
+    // CHECK ANIMAL
+    // =========================
+
     const animal = await prisma.animal.findFirst({
         where: {
-            id: Number(animalId),
-            userId: Number(userId),
+            id: numericAnimalId,
+            userId: numericUserId,
         },
+
         select: {
             id: true,
             name: true,
@@ -50,6 +58,24 @@ const getAnimalHistory = async (userId, animalId) => {
         throw new Error("Animal not found");
     }
 
+    // =========================
+    // MILK RECORDS
+    // =========================
+
+    const milkRecords = await prisma.milkRecord.findMany({
+        where: {
+            animalId: numericAnimalId,
+        },
+
+        orderBy: {
+            recordDate: "desc",
+        },
+    });
+
+    // =========================
+    // ANIMAL CREATED EVENT
+    // =========================
+
     const events = [
         {
             type: "ANIMAL_CREATED",
@@ -64,6 +90,32 @@ const getAnimalHistory = async (userId, animalId) => {
             },
         },
     ];
+
+    // =========================
+    // MILK EVENTS
+    // =========================
+
+    milkRecords.forEach((record) => {
+        events.push({
+            type: "MILK_RECORD",
+            date: record.recordDate,
+
+            title: "Milk Record",
+
+            description: `Total milk production was ${record.total} L.`,
+
+            details: {
+                morning: record.morning,
+                evening: record.evening,
+                total: record.total,
+                notes: record.notes,
+            },
+        });
+    });
+
+    // =========================
+    // SORT ALL EVENTS
+    // =========================
 
     events.sort(
         (a, b) =>

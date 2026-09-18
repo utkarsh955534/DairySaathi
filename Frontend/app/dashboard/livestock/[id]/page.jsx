@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import AnimalProfileHeader from "./components/AnimalProfileHeader";
 import AnimalInformation from "./components/AnimalInformation";
 import EditAnimal from "./components/EditAnimal";
+import MilkSection from "./components/MilkSection";
 import HistorySection from "./components/HistorySection";
 
 const API_BASE_URL =
@@ -25,6 +25,10 @@ export default function AnimalProfilePage() {
     const [history, setHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(true);
     const [historyError, setHistoryError] = useState("");
+
+    // =========================
+    // FETCH ANIMAL
+    // =========================
 
     useEffect(() => {
         if (!id) return;
@@ -68,6 +72,10 @@ export default function AnimalProfilePage() {
         fetchAnimal();
     }, [id, router]);
 
+    // =========================
+    // FETCH HISTORY
+    // =========================
+
     const fetchHistory = async () => {
         if (!id) return;
 
@@ -96,15 +104,18 @@ export default function AnimalProfilePage() {
 
             if (!response.ok) {
                 throw new Error(
-                    data.message || "Failed to load animal history"
+                    data.message ||
+                        "Failed to load animal history"
                 );
             }
 
             setHistory(data?.data?.events || []);
         } catch (error) {
             console.error("History fetch error:", error);
+
             setHistoryError(
-                error.message || "Failed to load history"
+                error.message ||
+                    "Failed to load history"
             );
         } finally {
             setHistoryLoading(false);
@@ -112,8 +123,14 @@ export default function AnimalProfilePage() {
     };
 
     useEffect(() => {
+        if (!id) return;
+
         fetchHistory();
     }, [id]);
+
+    // =========================
+    // DELETE ANIMAL
+    // =========================
 
     const handleDelete = async () => {
         if (!animal) return;
@@ -143,7 +160,8 @@ export default function AnimalProfilePage() {
 
             if (!response.ok) {
                 throw new Error(
-                    data.message || "Failed to delete animal"
+                    data.message ||
+                        "Failed to delete animal"
                 );
             }
 
@@ -154,13 +172,23 @@ export default function AnimalProfilePage() {
         }
     };
 
+    // =========================
+    // LOADING
+    // =========================
+
     if (loading) {
         return (
             <div className="flex min-h-full items-center justify-center">
-                <p className="text-gray-500">Loading animal...</p>
+                <p className="text-gray-500">
+                    Loading animal...
+                </p>
             </div>
         );
     }
+
+    // =========================
+    // NOT FOUND
+    // =========================
 
     if (!animal) {
         return (
@@ -171,7 +199,9 @@ export default function AnimalProfilePage() {
 
                 <button
                     onClick={() =>
-                        router.push("/dashboard/livestock")
+                        router.push(
+                            "/dashboard/livestock"
+                        )
                     }
                     className="mt-4 text-green-600"
                 >
@@ -181,26 +211,40 @@ export default function AnimalProfilePage() {
         );
     }
 
+    // =========================
+    // PAGE
+    // =========================
+
     return (
         <div className="min-h-full bg-gray-50 p-4 md:p-6 lg:p-8">
             <div className="mx-auto max-w-5xl">
 
+                {/* Back */}
+
                 <button
                     onClick={() =>
-                        router.push("/dashboard/livestock")
+                        router.push(
+                            "/dashboard/livestock"
+                        )
                     }
                     className="mb-5 text-sm font-medium text-gray-500 hover:text-gray-900"
                 >
                     ← Back to Animals
                 </button>
 
+                {/* Profile Header */}
+
                 <AnimalProfileHeader
                     animal={animal}
                     editing={editing}
-                    onEdit={() => setEditing((value) => !value)}
+                    onEdit={() =>
+                        setEditing((value) => !value)
+                    }
                     onDelete={handleDelete}
                     deleting={deleting}
                 />
+
+                {/* Edit */}
 
                 {editing && (
                     <EditAnimal
@@ -212,9 +256,23 @@ export default function AnimalProfilePage() {
                     />
                 )}
 
+                {/* Information */}
+
                 {!editing && (
-                    <AnimalInformation animal={animal} />
+                    <AnimalInformation
+                        animal={animal}
+                    />
                 )}
+
+                {/* Milk */}
+
+                {!editing && (
+                    <MilkSection
+                        animalId={animal.id}
+                    />
+                )}
+
+                {/* History */}
 
                 {!editing && (
                     <HistorySection
@@ -224,6 +282,7 @@ export default function AnimalProfilePage() {
                         onRetry={fetchHistory}
                     />
                 )}
+
             </div>
         </div>
     );
