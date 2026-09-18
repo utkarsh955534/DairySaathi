@@ -9,6 +9,7 @@ const historyRoutes = require("./modules/history/history.routes");
 const milkRoutes = require("./modules/milk/milk.routes");
 const weightRoutes = require("./modules/weight/weight.routes");
 const healthRoutes = require("./modules/health/health.routes");
+const breedingRoutes = require("./modules/breeding/breeding.routes");
 
 const app = express();
 
@@ -71,6 +72,8 @@ app.use("/api/v1/history", historyRoutes);
 app.use("/api/v1/milk", milkRoutes);
 app.use("/api/v1/weight", weightRoutes);
 app.use("/api/v1/health", healthRoutes);
+app.use("/api/v1/breeding", breedingRoutes);
+
 
 // ===============================
 // GLOBAL ERROR HANDLER

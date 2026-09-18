@@ -10,6 +10,7 @@ import MilkSection from "./components/MilkSection";
 import HistorySection from "./components/HistorySection";
 import WeightSection from "./components/WeightSection";
 import HealthSection from "./components/HealthSection";
+import BreedingSection from "./components/BreedingSection";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -285,6 +286,15 @@ export default function AnimalProfilePage() {
 
                 {!editing && (
                     <HealthSection
+                        animalId={animal.id}
+                    />
+                )}
+
+                {/* Breeding Section */}
+
+
+                {!editing && (
+                    <BreedingSection
                         animalId={animal.id}
                     />
                 )}

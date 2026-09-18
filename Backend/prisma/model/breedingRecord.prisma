@@ -1,0 +1,35 @@
+enum BreedingType {
+  HEAT
+  INSEMINATION
+  PREGNANCY_CHECK
+}
+
+model BreedingRecord {
+  id Int @id @default(autoincrement())
+
+  animalId Int
+
+  type BreedingType
+
+  recordDate DateTime
+
+  // Heat
+  heatObservation String?
+
+  // Insemination
+  semenCode String?
+  technician String?
+
+  // Pregnancy Check
+  pregnancyResult Boolean?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId])
+  @@index([recordDate])
+  @@index([type])
+}
