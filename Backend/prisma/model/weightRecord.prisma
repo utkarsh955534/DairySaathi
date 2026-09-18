@@ -1,0 +1,19 @@
+model WeightRecord {
+  id Int @id @default(autoincrement())
+
+  animalId Int
+
+  recordDate DateTime
+
+  weight Float
+
+  notes String?
+
+  createdAt DateTime @default(now())
+
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@unique([animalId, recordDate])
+  @@index([animalId])
+  @@index([recordDate])
+}

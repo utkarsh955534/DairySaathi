@@ -54,6 +54,7 @@ model Animal {
   childrenByFather Animal[] @relation("FatherChildren")
 
   milkRecords MilkRecord[]
+  weightRecords WeightRecord[]
 
   @@unique([userId, tagNumber])
 

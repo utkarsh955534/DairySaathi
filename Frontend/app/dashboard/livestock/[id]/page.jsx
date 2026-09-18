@@ -8,6 +8,7 @@ import AnimalInformation from "./components/AnimalInformation";
 import EditAnimal from "./components/EditAnimal";
 import MilkSection from "./components/MilkSection";
 import HistorySection from "./components/HistorySection";
+import WeightSection from "./components/WeightSection";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -105,7 +106,7 @@ export default function AnimalProfilePage() {
             if (!response.ok) {
                 throw new Error(
                     data.message ||
-                        "Failed to load animal history"
+                    "Failed to load animal history"
                 );
             }
 
@@ -115,7 +116,7 @@ export default function AnimalProfilePage() {
 
             setHistoryError(
                 error.message ||
-                    "Failed to load history"
+                "Failed to load history"
             );
         } finally {
             setHistoryLoading(false);
@@ -161,7 +162,7 @@ export default function AnimalProfilePage() {
             if (!response.ok) {
                 throw new Error(
                     data.message ||
-                        "Failed to delete animal"
+                    "Failed to delete animal"
                 );
             }
 
@@ -271,6 +272,14 @@ export default function AnimalProfilePage() {
                         animalId={animal.id}
                     />
                 )}
+                {/* Weight Section */}
+
+                {!editing && (
+                    <WeightSection
+                        animalId={animal.id}
+                    />
+                )}
+
 
                 {/* History */}
 
