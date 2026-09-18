@@ -143,6 +143,10 @@ model Animal {
 
   calvingsAsCalf CalvingRecord[] @relation("CalvingCalf")
 
+  lactationRecords LactationRecord[] @relation("AnimalLactations")
+
+calfLactations LactationRecord[] @relation("LactationCalf")
+
   // =========================
   // CONSTRAINTS
   // =========================

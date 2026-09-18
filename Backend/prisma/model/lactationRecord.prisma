@@ -1,0 +1,29 @@
+model LactationRecord {
+  id Int @id @default(autoincrement())
+
+  animalId Int
+
+  lactationNumber Int
+
+  startDate DateTime
+
+  endDate DateTime?
+
+  totalMilk Float?
+
+  peakMilk Float?
+
+  calfId Int?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+
+  animal Animal @relation("AnimalLactations", fields: [animalId],  references: [id], onDelete: Cascade)
+
+  calf Animal? @relation("LactationCalf", fields: [calfId], references: [id], onDelete: SetNull)
+
+  @@unique([animalId, lactationNumber])
+  @@index([animalId])
+  @@index([calfId])
+}

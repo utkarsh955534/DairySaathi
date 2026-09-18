@@ -11,6 +11,7 @@ const weightRoutes = require("./modules/weight/weight.routes");
 const healthRoutes = require("./modules/health/health.routes");
 const breedingRoutes = require("./modules/breeding/breeding.routes");
 const calvingRoutes = require("./modules/calving/calving.routes");
+const lactationRoutes = require("./modules/lactation/lactation.routes");
 
 const app = express();
 
@@ -75,6 +76,7 @@ app.use("/api/v1/weight", weightRoutes);
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/breeding", breedingRoutes);
 app.use("/api/v1/calving", calvingRoutes);
+app.use("/api/v1/lactation", lactationRoutes);
 
 
 // ===============================
