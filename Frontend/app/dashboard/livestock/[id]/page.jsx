@@ -13,6 +13,7 @@ import HealthSection from "./components/HealthSection";
 import BreedingSection from "./components/BreedingSection";
 import CalvingSection from "./components/CalvingSection";
 import LactationSection from "./components/LactationSection";
+import QRSection from "./components/QRSection";
 
 const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
@@ -325,6 +326,12 @@ export default function AnimalProfilePage() {
                         loading={historyLoading}
                         error={historyError}
                         onRetry={fetchHistory}
+                    />
+                )}
+
+                {!editing && (
+                    <QRSection
+                        animalId={animal.id}
                     />
                 )}
 

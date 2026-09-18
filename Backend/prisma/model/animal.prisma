@@ -3,6 +3,8 @@
 model Animal {
   id Int @id @default(autoincrement())
 
+  publicToken String? @unique
+
   // =========================
   // OWNER
   // =========================
