@@ -286,10 +286,43 @@ const updateAnimal = async (userId, id, data) => {
     });
 };
 
+
+const getLactatingAnimals = async (userId) => {
+  return prisma.animal.findMany({
+    where: {
+      userId,
+      sex: "FEMALE",
+      lifeStage: "ADULT",
+      productionStatus: "LACTATING",
+      lactationRecords: {
+        some: {
+          endDate: null,
+        },
+      },
+    },
+    orderBy: {
+      tagNumber: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      tagNumber: true,
+      species: true,
+      sex: true,
+      lifeStage: true,
+      productionStatus: true,
+      currentMilkProduction: true,
+      lactationNumber: true,
+    },
+  });
+};
+
+
 module.exports = {
     createAnimal,
     getAnimals,
     getAnimalById,
+    getLactatingAnimals,
     deleteAnimal,
     updateAnimal
 };

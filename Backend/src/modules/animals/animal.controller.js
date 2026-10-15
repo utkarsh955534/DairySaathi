@@ -84,10 +84,25 @@ const updateAnimal = async (req, res, next) => {
     }
 };
 
+const getLactatingAnimals = async (req, res, next) => {
+    try {
+        const animals =
+            await animalService.getLactatingAnimals(req.user.id);
+
+        return res.status(200).json({
+            success: true,
+            data: animals,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createAnimal,
     getAnimals,
     getAnimalById,
+    getLactatingAnimals,
     deleteAnimal,
     updateAnimal
 };

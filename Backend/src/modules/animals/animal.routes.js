@@ -1,3 +1,4 @@
+
 const express = require("express");
 const multer = require("multer");
 
@@ -11,7 +12,8 @@ const {
     getAnimals,
     getAnimalById,
     deleteAnimal,
-    updateAnimal
+    updateAnimal,
+    getLactatingAnimals,
 } = require("./animal.controller");
 
 const {
@@ -33,9 +35,13 @@ router.post(
 
 router.get("/", getAnimals);
 
+// Register this before "/:id"
+router.get("/lactating", getLactatingAnimals);
+
 router.get("/:id", getAnimalById);
 
 router.delete("/:id", deleteAnimal);
-router.put("/:id",updateAnimal)
+
+router.put("/:id", updateAnimal);
 
 module.exports = router;
