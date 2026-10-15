@@ -21,7 +21,7 @@ const menuItems = [
     },
     {
         name: "Health",
-        href: "/dashboard/health",
+        href: "/dashboard/livestock",
         icon: "🩺",
     },
     {
