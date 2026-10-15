@@ -31,7 +31,7 @@ app.use(helmet());
 // ===============================
 
 const allowedOrigins = [
-  "https://dairy-saathi-eight.vercel.app/",
+  "https://dairy-saathi-eight.vercel.app",
 ];
 
 app.use(
