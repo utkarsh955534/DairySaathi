@@ -16,13 +16,13 @@ export default function QuickActions() {
             title: "Add Milk Record",
             description: "Record today's milk",
             icon: "🥛",
-            path: "/dashboard/milk/add",
+            path: "/dashboard/milk",
         },
         {
             title: "Health Record",
             description: "Add health information",
             icon: "🩺",
-            path: "/dashboard/health/add",
+            path: "/dashboard/livestock",
         },
         {
             title: "Book Veterinarian",
