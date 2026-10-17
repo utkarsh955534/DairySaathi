@@ -31,7 +31,7 @@ app.use(helmet());
 // ===============================
 
 const allowedOrigins = [
-  "https://dairy-saathi-eight.vercel.app",
+  process.env.FRONTEND_URL,
 ];
 
 app.use(
